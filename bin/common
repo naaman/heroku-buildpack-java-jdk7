@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+
+get_java_version() {
+  pomFile="$(_get_pom_file ${1})"
+  utilJar="$(get_jvm_utils_command ${1})"
+  pomJvmVersion="$(java -jar $(get_jvm_utils_command ${1}) javaversion -pom ${pomFile})" 
+  if [ "$(expr "${pomJvmVersion}" : '1.[6-7]')" != 0 ] ; then
+    echo "${pomJvmVersion}"
+  else
+    echo "1.7"
+  fi
+}
+
+_get_pom_file() {
+  baseDir=${1:-"No Dir"}
+  if [ "${baseDir}" == "No Dir" ] || [ ! -d "${baseDir}" ] ; then
+    echo "Invalid directory specified for pom file."
+    return 1
+  fi
+
+  pomFile="${baseDir}/pom.xml"
+
+  if [ -f "${pomFile}" ] ; then
+    echo "${pomFile}"
+  else
+    echo "No pom file specified for maven project."
+    return 1
+  fi
+}
+
+get_jvm_utils_command() {
+  baseDir=${1:-"No Dir"}
+  if [ "${baseDir}" == "No Dir" ] || [ ! -d "${baseDir}" ] ; then
+    echo "Invalid directory specified for pom file."
+    return 1
+  fi
+  
+  jvmUtilsDir="${baseDir}"/.jvm-utils
+  mkdir -p "${jvmUtilsDir}"
+  
+  if [ ! -f "$jvmUtilsDir"/jvm-utils.jar ] ; then
+    jvmUtilsURL="https://s3.amazonaws.com/heroku-jvm-langpack-java/buildpack-jvm-utils-0.1.jar"
+    curl --silent --location ${jvmUtilsURL} --output "${jvmUtilsDir}"/jvm-utils.jar 
+  fi
+
+  echo "${jvmUtilsDir}"/jvm-utils.jar
+}

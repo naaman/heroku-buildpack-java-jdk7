@@ -9,6 +9,7 @@ BIN_DIR=$(cd $(dirname $0); pwd) # absolute path
 BUILD_DIR=$1
 CACHE_DIR=$2
 
+JDK_VERSION="$(get_java_version "${BUILD_DIR}")"
 KEEP_M2_CACHE="true"
 
 if [ ! -d $CACHE_DIR ]; then
@@ -55,6 +56,7 @@ if [ -d "$CACHE_DIR/.jdk7" ]; then
 fi
 
 OPENJDK7_URL="https://s3.amazonaws.com/heroku-jvm-langpack-java/openjdk7-u2-heroku-temaki.tar.gz"
+OPENJDK6_URL="https://s3.amazonaws.com/heroku-jvm-langpack-java/openjdk6-u25-heroku-temaki-b25.tar.gz"
 
 if [ ! -d "$BUILD_DIR/.jdk7" ]; then
   echo -n "-----> Installing OpenJDK7u2 build (to .jdk7)....."
