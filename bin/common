@@ -3,7 +3,7 @@
 get_java_version() {
   pomFile="$(_get_pom_file ${1})"
   utilJar="$(get_jvm_utils_command ${1})"
-  pomJvmVersion="$(java -jar $(get_jvm_utils_command ${1}) javaversion -pom ${pomFile})" 
+  pomJvmVersion="$(java -jar ${utilJar} javaversion -pom ${pomFile})" 
   if [ "$(expr "${pomJvmVersion}" : '1.[6-7]')" != 0 ] ; then
     echo "${pomJvmVersion}"
   else
