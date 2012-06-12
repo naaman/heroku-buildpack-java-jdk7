@@ -36,6 +36,18 @@ test_existingUppercasePomFile() {
   assertCapturedEquals "${BUILD_DIR}/pom.xml"
 }
 
+test_defaultJdkUrl() {
+  capture _get_jdk_download_url 
+  assertCapturedSuccess
+  assertCapturedEquals "${JDK_URL_1_7}"
+}
+
+test_nonDefaultJdkUrl() {
+  capture _get_jdk_download_url "1.6"
+  assertCapturedSuccess
+  assertCapturedEquals "${JDK_URL_1_6}"
+}
+
 test_javaVersionInPom() {
   cat > ${BUILD_DIR}/pom.xml <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
@@ -97,7 +109,7 @@ test_unsupportedJavaVersionInPom() {
 EOF
   capture get_java_version ${BUILD_DIR}
   assertCapturedSuccess
-  assertCapturedEquals "1.7"
+  assertCapturedEquals "${LATEST_JDK_VERSION}"
 }
 
 test_unspecifiedJavaVersionInPom() {
@@ -116,6 +128,20 @@ test_unspecifiedJavaVersionInPom() {
 EOF
   capture get_java_version ${BUILD_DIR}
   assertCapturedSuccess
-  assertCapturedEquals "1.7"
+  assertCapturedEquals "${LATEST_JDK_VERSION}"
 }
 
+test_installJavaWithoutDirectoryFails() {
+  capture install_java
+  assertCapturedError
+  assertCapturedEquals "Invalid directory to install java."
+}
+
+test_installDefaultJava() {
+  capture install_java ${BUILD_DIR}
+  assertCapturedSuccess
+  assertTrue "A .jdk directory should be created when installing java." "[ -d ${BUILD_DIR}/.jdk ]"
+  assertTrue "The java runtime should be present." "[ -f ${BUILD_DIR}/.jdk/bin/java ]"
+  assertEquals "${BUILD_DIR}/.jdk" "${JAVA_HOME}"
+  assertContains "${BUILD_DIR}/.jdk/bin" "${PATH}"
+}
