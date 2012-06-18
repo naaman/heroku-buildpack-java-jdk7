@@ -38,29 +38,29 @@ test_existingUppercasePomFile() {
 }
 
 test_defaultJdkUrl() {
+  capture _get_jdk_download_url "${DEFAULT_JDK_VERSION}"
+  assertCapturedSuccess
+  assertTrue "The URL should be for the default JDK, ${DEFAULT_JDK_VERSION}." "[ $(cat ${STD_OUT}) == '${JDK_URL_1_6}' ] || [ '$(cat ${STD_OUT})' == '${JDK_URL_1_6_DARWIN}' ]"
+}
+
+test_nonDefaultJdkUrl() {
   capture _get_jdk_download_url "${LATEST_JDK_VERSION}"
   assertCapturedSuccess
   assertTrue "The URL should be for the latest JDK, ${LATEST_JDK_VERSION}." "[ $(cat ${STD_OUT}) == '${JDK_URL_1_7}' ] || [ '$(cat ${STD_OUT})' == '${JDK_URL_1_7_DARWIN}' ]"
 }
 
-test_nonDefaultJdkUrl() {
-  capture _get_jdk_download_url "1.6"
-  assertCapturedSuccess
-  assertTrue "The URL should be for the latest JDK, ${LATEST_JDK_VERSION}." "[ $(cat ${STD_OUT}) == '${JDK_URL_1_6}' ] || [ '$(cat ${STD_OUT})' == '${JDK_URL_1_6_DARWIN}' ]"
-}
-
 test_javaVersionInPom() {
-  _writePomFile "1.6"
+  _writePomFile "1.7"
   capture get_java_version ${BUILD_DIR}
   assertCapturedSuccess
-  assertCapturedEquals "1.6"
+  assertCapturedEquals "1.7"
 }
 
 test_unsupportedJavaVersionInPom() {
   _writePomFile "1.5"
   capture get_java_version ${BUILD_DIR}
   assertCapturedSuccess
-  assertCapturedEquals "${LATEST_JDK_VERSION}"
+  assertCapturedEquals "${DEFAULT_JDK_VERSION}"
 }
 
 test_unspecifiedJavaVersionInPom() {
@@ -79,7 +79,7 @@ test_unspecifiedJavaVersionInPom() {
 EOF
   capture get_java_version ${BUILD_DIR}
   assertCapturedSuccess
-  assertCapturedEquals "${LATEST_JDK_VERSION}"
+  assertCapturedEquals "${DEFAULT_JDK_VERSION}"
 }
 
 test_installJavaWithoutDirectoryFails() {
@@ -98,7 +98,7 @@ test_installDefaultJava() {
   assertEquals "${BUILD_DIR}/.jdk/$(_get_relative_jdk_home)" "${JAVA_HOME}"
   assertContains "${BUILD_DIR}/.jdk/$(_get_relative_jdk_bin)" "${PATH}"
   assertTrue "A version file should have been created." "[ -f ${BUILD_DIR}/.jdk/version ]"
-  assertEquals "$(cat ${BUILD_DIR}/.jdk/version)" "${LATEST_JDK_VERSION}"
+  assertEquals "$(cat ${BUILD_DIR}/.jdk/version)" "${DEFAULT_JDK_VERSION}"
   assertEquals "${BUILD_DIR}/.jdk/$(_get_relative_jdk_bin)/java" "$(which java)"
 }
 
@@ -148,6 +148,6 @@ test_installJavaWith1_5() {
   _writePomFile "1.5"
   capture install_java ${BUILD_DIR}
   assertCapturedSuccess
-  assertTrue "Precondition: JDK6 should have been installed." "[ $(cat ${BUILD_DIR}/.jdk/version) == '${LATEST_JDK_VERSION}' ]"
+  assertTrue "Precondition: JDK6 should have been installed." "[ $(cat ${BUILD_DIR}/.jdk/version) == '${DEFAULT_JDK_VERSION}' ]"
   assertEquals "${BUILD_DIR}/.jdk/$(_get_relative_jdk_bin)/java" "$(which java)"
 }
