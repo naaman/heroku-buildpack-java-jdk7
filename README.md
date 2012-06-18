@@ -1,8 +1,9 @@
 Heroku buildpack: Java
 =========================
 
-This is a [Heroku buildpack](http://devcenter.heroku.com/articles/buildpack) for Java apps.
-It uses Maven 3.0.3 to build your application and OpenJDK 7u2 to run it.
+This is a [Heroku buildpack](http://devcenter.heroku.com/articles/buildpack) for Maven-based Java apps.
+It uses Maven 3.0.3 to build your application runs the app with the latest major version of OpenJDK 6 or 7.
+If no version is specified, it defaults to OpenJDK 7.
 
 Usage
 -----
@@ -12,24 +13,42 @@ Example usage:
     $ ls
     Procfile  pom.xml  src
 
-    $ heroku create --stack cedar --buildpack http://github.com/sclasen/heroku-buildpack-java-jdk7.git
+    $ heroku create --stack cedar --buildpack http://github.com/naamannewbold/heroku-buildpack-java-jdk7.git
 
     $ git push heroku master
     ...
     -----> Heroku receiving push
-    -----> Fetching custom language pack... done
+    -----> Fetching custom buildpack... done
     -----> Java app detected
+    -----> Installing Java 1.7 done
     -----> Installing Maven 3.0.3..... done
-    -----> Installing settings.xml..... done
-    -----> executing /app/tmp/repo.git/.cache/.maven/bin/mvn -B -Duser.home=/tmp/build_19z6l4hp57wqm -Dmaven.repo.local=/app/tmp/repo.git/.cache/.m2/repository -s /app/tmp/repo.git/.cache/.m2/settings.xml -DskipTests=true clean install
-           [INFO] Scanning for projects...
-           [INFO]                                                                         
-           [INFO] ------------------------------------------------------------------------
-           [INFO] Building readmeTest 1.0-SNAPSHOT
-           [INFO] ------------------------------------------------------------------------
+    -----> executing mvn -B -Duser.home="/tmp/build_20jjpjlaxpjd" -Dmaven.repo.local="/app/tmp/repo.git/.cache/.m2/repository" -s "/app/tmp/repo.git/.cache"/.m2/settings.xml -DskipTests=true clean install
+       [INFO] Scanning for projects...
+       [INFO]                                                                         
+       [INFO] ------------------------------------------------------------------------
+       [INFO] Building java-app 1.0
+       [INFO] ------------------------------------------------------------------------
     ...
 
-The buildpack will detect your app as Java if it has the file `pom.xml` in the root.  It will use Maven to execute the build defined by your pom.xml and download your dependencies. The .m2 folder (local maven repository) will be cached between builds for faster dependency resolution. However neither the mvn executable or the .m2 folder will be available in your slug at runtime.
+By default, the app will use Java 7. However, the primary version of java can be specified with the 
+maven-compiler-plugin. To specify Java 6, add the following to your `pom.xml`
+
+```xml
+<plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-compiler-plugin</artifactId>
+    <version>2.4</version>
+    <configuration>
+        <source>1.6</source>
+        <target>1.6</target>
+    </configuration>
+</plugin>
+```
+
+The buildpack will detect your app as Java if it has the file `pom.xml` in the root.  It will use Maven 
+to execute the build defined by your pom.xml and download your dependencies. The .m2 folder (local maven 
+repository) will be cached between builds for faster dependency resolution. However neither the mvn 
+executable or the .m2 folder will be available in your slug at runtime.
 
 Hacking
 -------
