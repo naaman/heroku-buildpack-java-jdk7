@@ -65,7 +65,7 @@ From your project directory, create a cache dir and compile:
 
 `mkdir -p /tmp/jdk7buildpackcache`
 
-`/path/to/jdk7buildpack . /tmp/jdk7buildpackcache`
+`/path/to/jdk7buildpack/bin/compile . /tmp/jdk7buildpackcache`
 
 Hacking
 -------
