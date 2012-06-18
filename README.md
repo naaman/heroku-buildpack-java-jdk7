@@ -50,6 +50,23 @@ to execute the build defined by your pom.xml and download your dependencies. The
 repository) will be cached between builds for faster dependency resolution. However neither the mvn 
 executable or the .m2 folder will be available in your slug at runtime.
 
+Building Locally
+----------------
+
+This buildpack can be used to build locally on *nix systems.
+
+> Note: This has only been tested with Ubuntu 10.04 x86_64, Ubuntu 12.04 x86_64, and Mac 10.7.4 x86_64. This has not been tested with 32-bit systems.
+
+To use locally, clone the repo:
+
+`git clone git://github.com/naamannewbold/heroku-buildpack-java-jdk7.git jdk7buildpack`
+
+From your project directory, create a cache dir and compile:
+
+`mkdir -p /tmp/jdk7buildpackcache`
+
+`/path/to/jdk7buildpack . /tmp/jdk7buildpackcache`
+
 Hacking
 -------
 
@@ -61,9 +78,13 @@ For example if you want to have maven available to use at runtime in your applic
       cp -r $CACHE_DIR/$DIR $BUILD_DIR/$DIR
     done
 
-This will copy the local maven repo and maven binaries into your slug.
+Now that you have changes, make sure to test them using the [testrunner buildpack](https://github.com/ryanbrainard/heroku-buildpack-testrunner). 
+Tests are located in the `test` directory and use the naming convention `xxxxx_test.sh`. Any function beginning with `test_` will
+be evaluated by the test runner. To run tests:
 
-Commit and push the changes to your buildpack to your Github fork, then push your sample app to Heroku to test. Once the push succeeds you should be able to run:
+    `/path/to/heroku-buildpack-testrunner/bin/run .`
+
+When all tests are passing, commit and push the changes to your buildpack to your Github fork, then push a sample app to Heroku to test. Once the push succeeds you should be able to run:
 
     $ heroku run bash
 
