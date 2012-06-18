@@ -25,7 +25,7 @@ echo -n "-----> Installing Maven 3.0.3....."
 install_maven ${CACHE_DIR}
 echo " done"
 
-echo "-----> executing $(get_build_command "${BUILD_DIR}")"
+echo "-----> executing $(get_build_command "${BUILD_DIR}" "${CACHE_DIR}")"
 build ${BUILD_DIR} ${CACHE_DIR}
 echo "-----> build finished"
 
