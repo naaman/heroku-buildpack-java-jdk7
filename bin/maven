@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+
+MAVEN_URL_3="http://s3.amazonaws.com/heroku-jvm-langpack-java/maven.tar.gz"
+MAVEN_SETTINGS_URL_3="http://s3.amazonaws.com/heroku-jvm-langpack-java/settings.xml"
+
+install_maven() {
+  baseDir=$1
+  if [ ! -d "${baseDir}" ]; then echo "Invalid directory to install maven in."; return 1; fi
+  mavenDir="${baseDir}"/.maven
+  m2Dir="$(_get_m2Dir ${baseDir})"
+  mavenTar="${baseDir}"/maven.tar.gz
+  mavenBin="${mavenDir}"/bin
+  mavenExe="${mavenBin}"/mvn
+  mavenSettings="$(_get_settings_xml "${baseDir}")"
+  if [ ! -f ${mavenExe} ]; then
+    curl --silent --output ${mavenTar} --location ${MAVEN_URL_3}
+    tar pxzf ${mavenTar} -C ${baseDir} 
+    rm ${mavenTar}
+    chmod +x ${mavenExe}
+  fi
+  if [ ! -f ${mavenSettings} ]; then
+    curl --silent --output ${mavenSettings} --location ${MAVEN_SETTINGS_URL_3}
+  fi
+  export PATH="${mavenBin}:${PATH}"
+  export M2_HOME="${mavenDir}"
+  export MAVEN_OPTS="-Xmx512m"
+}
+
+build() {
+  buildDir=$1
+  cacheDir=$2
+  currentDir=$(pwd)
+  buildCommand="$(get_build_command ${buildDir} ${cacheDir})"
+  exitStatus=$?
+  if [ "${exitStatus}" != "0" ]; then echo "${buildCommand}"; return ${exitStatus}; fi
+  cd ${buildDir}
+  eval ${buildCommand} 2>&1 | sed -u 's/^/       /'
+  cd ${currentDir}
+}
+
+get_build_command() {
+  homeDir=$1
+  mavenInstallBaseDir=$2
+  if [ ! -d "${homeDir}" ]; then echo "Invalid home directory."; return 7; fi
+  if [ ! -d "${mavenInstallBaseDir}" ] || \
+     [ ! -d "$(_get_m2_repository "${mavenInstallBaseDir}")" ] || \
+     [ ! -f "$(_get_settings_xml "${mavenInstallBaseDir}")" ]; then
+    echo "Invalid maven base directory."
+    return 8
+  fi
+  echo "mvn -B -Duser.home=\"${homeDir}\" -Dmaven.repo.local=\"$(_get_m2_repository "${baseDir}")\" -s $(_get_settings_xml \"${baseDir}\") -DskipTests=true clean install"
+}
+
+_get_m2Dir() {
+  baseDir=$1
+  echo "${baseDir}"/.m2
+}
+
+_get_m2_repository() {
+  baseDir=$1
+  echo "$(_get_m2Dir "${baseDir}")"/repository
+}
+
+_get_settings_xml() {
+  baseDir=$1
+  echo "$(_get_m2Dir "${baseDir}")/settings.xml"
+}

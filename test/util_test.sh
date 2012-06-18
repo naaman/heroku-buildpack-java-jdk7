@@ -48,3 +48,9 @@ test_sourceDirOverwritesDestDir() {
   assertTrue "${BUILD_DIR}/dir1/source should exist in the source directory, but it does not." "[ -f ${BUILD_DIR}/dir1/source ]"
   assertTrue "${BUILD_DIR}/dir1/destination should have been removed from the target directory, but it does not." "[ ! -f ${BUILD_DIR}/dir1/destination ]"
 }
+
+test_recursiveDirectoriesCopied() {
+  mkdir -p ${CACHE_DIR}/dir1/dir2/dir3
+  copy_directories "dir1" ${CACHE_DIR} ${BUILD_DIR}
+  assertTrue "dir3 should exist in the target directory." "[ -d ${BUILD_DIR}/dir1/dir2/dir3 ]"
+}

@@ -1,96 +1,36 @@
 #!/usr/bin/env bash
-# bin/compile <build-dir> <cache-dir>
-
 # fail fast
 set -e
 
 BIN_DIR=$(cd $(dirname $0); pwd) # absolute path
 
-. ${BIN_DIR}/common
+# import libs
+. ${BIN_DIR}/java
+. ${BIN_DIR}/maven
 . ${BIN_DIR}/util
 
 # parse args
 BUILD_DIR=$1
 CACHE_DIR=$2
 
-install_java 
-JDK_VERSION="$(get_java_version "${BUILD_DIR}")"
-
+# copy cache directories
 mkdir -p $CACHE_DIR
-copy_directories ".jdk .maven .m2" ${CACHE_DIR} ${BUILD_DIR}
+copy_directories ".jdk" ${CACHE_DIR} ${BUILD_DIR}
 
+echo -n "-----> Installing Java $(get_java_version ${BUILD_DIR})"
+install_java ${BUILD_DIR} 
+echo " done"
 
-# change to cache dir to install maven
-cd $CACHE_DIR
-
-# install maven with base repository
-MAVEN_URL="http://s3.amazonaws.com/heroku-jvm-langpack-java/maven.tar.gz"
-
-if [ ! -d .maven ]; then
-  echo -n "-----> Installing Maven 3.0.3....."
-  curl --silent --max-time 60 --location $MAVEN_URL | tar xz
-  chmod +x .maven/bin/mvn
-  echo " done"
-fi
-
-MAVEN_SETTINGS_URL="http://s3.amazonaws.com/heroku-jvm-langpack-java/settings.xml"
-
-echo -n "-----> Installing settings.xml....."
-if [ -f .m2/settings.xml ]; then
-  rm .m2/settings.xml 
-fi
-curl --silent --max-time 10 --location $MAVEN_SETTINGS_URL --output .m2/settings.xml
+echo -n "-----> Installing Maven 3.0.3....."
+install_maven ${CACHE_DIR}
 echo " done"
 
 
-cd $BUILD_DIR
-if [ -d "$CACHE_DIR/.jdk7" ]; then
-  echo -n "copying jdk to app"
-  cp -r "$CACHE_DIR/.jdk7" $BUILD_DIR
-  echo "done"
-fi
-
-OPENJDK7_URL="https://s3.amazonaws.com/heroku-jvm-langpack-java/openjdk7-u2-heroku-temaki.tar.gz"
-OPENJDK6_URL="https://s3.amazonaws.com/heroku-jvm-langpack-java/openjdk6-u25-heroku-temaki-b25.tar.gz"
-
-if [ ! -d "$BUILD_DIR/.jdk7" ]; then
-  echo -n "-----> Installing OpenJDK7u2 build (to .jdk7)....."
-  mkdir "$BUILD_DIR/.jdk7"
-  cd "$BUILD_DIR/.jdk7"
-  curl --silent --max-time 180 --location $OPENJDK7_URL | tar xz
-  echo " done"
-fi
-
-
-# change to build dir to run maven
-cd $BUILD_DIR
-
-export MAVEN_OPTS="-Xmx512m"
-export JAVA_HOME="$BUILD_DIR/.jdk7"
-
-# build app
-BUILDCMD="$CACHE_DIR/.maven/bin/mvn -B -Duser.home=$BUILD_DIR -Dmaven.repo.local=$CACHE_DIR/.m2/repository -s $CACHE_DIR/.m2/settings.xml -DskipTests=true clean install"
-echo "-----> executing $BUILDCMD"
-
-$BUILDCMD 2>&1 | sed -u 's/^/       /'
+BUILDCMD="mvn -B -Duser.home=$BUILD_DIR -Dmaven.repo.local=$CACHE_DIR/.m2/repository -s $CACHE_DIR/.m2/settings.xml -DskipTests=true clean install"
+echo "-----> executing $(get_build_command "${BUILD_DIR}")"
+build ${BUILD_DIR} ${CACHE_DIR}
 
 if [ "${PIPESTATUS[*]}" != "0 0" ]; then
   echo " !     Failed to build app with Maven"
   exit 1
 fi
-
-# finalize cache
-if [ "false" == $KEEP_M2_CACHE ]; then
-  touch $CACHE_DIR/removeM2Cache
-fi
-
-#copy .m2 and .maven if needed
-if [ "true" == $KEEP_M2_CACHE ]; then
-  for DIR in ".m2" ".maven" ; do
-    cp -r $CACHE_DIR/$DIR $DIR
-  done
-fi
-
-cp -r .jdk7 $CACHE_DIR/.jdk7
-
-
