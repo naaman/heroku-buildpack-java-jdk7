@@ -35,6 +35,10 @@ build() {
   if [ "${exitStatus}" != "0" ]; then echo "${buildCommand}"; return ${exitStatus}; fi
   cd ${buildDir}
   eval ${buildCommand} 2>&1 | sed -u 's/^/       /'
+  if [ "${PIPESTATUS[*]}" != "0 0" ]; then
+    echo " !     Failed to build app with Maven"
+    exit 1
+  fi
   cd ${currentDir}
 }
 
