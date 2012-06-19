@@ -52,7 +52,7 @@ get_build_command() {
     echo "Invalid maven base directory."
     return 8
   fi
-  echo "mvn -B -Duser.home=\"${homeDir}\" -Dmaven.repo.local=\"$(_get_m2_repository "${baseDir}")\" -s $(_get_settings_xml \"${baseDir}\") -DskipTests=true clean install"
+  echo "mvn -B -Duser.home=\"${homeDir}\" -Dmaven.repo.local=\"$(_get_m2_repository "${mavenInstallBaseDir}")\" -s $(_get_settings_xml \"${mavenInstallBaseDir}\") -DskipTests=true clean install"
 }
 
 _get_m2Dir() {
