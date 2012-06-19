@@ -69,6 +69,15 @@ _get_os_suffix() {
 
 get_java_version() {
   pomFile="$(_get_pom_file ${1})"
+  if [[ -x $(which mvn) && -f ${pomFile} ]]; then
+    currDir=$(pwd)
+    pomDir=$(cd $(dirname $pomFile); pwd)
+    effectivePom="${1}/effective-pom.xml"
+    cd $pomDir
+    mvn org.apache.maven.plugins:maven-help-plugin:2.1.1:effective-pom -Doutput=${effectivePom} >> /dev/null
+    pomFile=${effectivePom}
+    cd ${currDir}
+  fi
   utilJar="$(get_jvm_utils_command ${1})"
   pomJvmVersion="$(java -jar ${utilJar} javaversion -pom ${pomFile})" 
   if [ "$(expr "${pomJvmVersion}" : '1.[6-7]')" != 0 ] ; then

@@ -106,7 +106,6 @@ test_installJavaWithVersion() {
   _writePomFile "1.6"
 
   capture install_java ${BUILD_DIR}
-  cat ${STD_OUT}
   assertTrue "A .jdk directory should be created when installing java." "[ -d ${BUILD_DIR}/.jdk ]"
   assertTrue "The java runtime should be present." "[ -f ${BUILD_DIR}/.jdk/$(_get_relative_jdk_bin)/java ]"
   assertEquals "${BUILD_DIR}/.jdk/$(_get_relative_jdk_home)" "${JAVA_HOME}"
@@ -131,10 +130,11 @@ test_upgradeFrom1_6To1_7() {
 }
 
 test_upgradeFrom1_7To1_6() {
+  unset JAVA_HOME # unsets environment -- shunit doesn't clean environment before each test
   _writePomFile "1.7"
   capture install_java ${BUILD_DIR}
   assertCapturedSuccess
-  assertTrue "Precondition: JDK6 should have been installed." "[ $(cat ${BUILD_DIR}/.jdk/version) == '1.7' ]"
+  assertTrue "Precondition: JDK7 should have been installed." "[ $(cat ${BUILD_DIR}/.jdk/version) == '1.7' ]"
   assertEquals "${BUILD_DIR}/.jdk/$(_get_relative_jdk_bin)/java" "$(which java)"
 
   _writePomFile "1.6"

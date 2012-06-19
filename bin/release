@@ -11,6 +11,4 @@ config_vars:
   MAVEN_OPTS: -Xmx384m -Xss512k -XX:+UseCompressedOops 
 addons:
   shared-database:5mb
-
-
 EOF
