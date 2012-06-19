@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-MAVEN_URL_3="http://s3.amazonaws.com/heroku-jvm-langpack-java/maven.tar.gz"
+MAVEN_URL_3="http://s3.amazonaws.com/heroku-jvm-langpack-java/maven-3.0.3-primed.tar.gz"
 MAVEN_SETTINGS_URL_3="http://s3.amazonaws.com/heroku-jvm-langpack-java/settings.xml"
 
 install_maven() {

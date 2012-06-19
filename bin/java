@@ -69,12 +69,12 @@ _get_os_suffix() {
 
 get_java_version() {
   pomFile="$(_get_pom_file ${1})"
-  if [[ -x $(which mvn) && -f ${pomFile} ]]; then
+  if [[ -x $(which mvn) && -f ${pomFile} && -d ${CACHE_DIR}/.m2/repository ]]; then
     currDir=$(pwd)
     pomDir=$(cd $(dirname $pomFile); pwd)
     effectivePom="${1}/effective-pom.xml"
     cd $pomDir
-    mvn org.apache.maven.plugins:maven-help-plugin:2.1.1:effective-pom -Doutput=${effectivePom} >> /dev/null
+    mvn -B org.apache.maven.plugins:maven-help-plugin:2.1.1:effective-pom -Dmaven.repo.local=${CACHE_DIR}/.m2/repository -Doutput=${effectivePom} >> /dev/null
     pomFile=${effectivePom}
     cd ${currDir}
   fi
