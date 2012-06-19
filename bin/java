@@ -11,7 +11,7 @@ JDK_URL_1_7_DARWIN="http://heroku-jvm-langpack-java.s3.amazonaws.com/openjdk7-u4
 install_java() {
   baseDir=$1
   if [ ! -d "${baseDir}" ]; then echo "Invalid directory to install java."; return 1 ; fi
-  javaVersion="$(get_java_version ${baseDir})"
+  javaVersion=${2:-"$(get_java_version ${baseDir})"}
   jdkDir="${baseDir}"/.jdk
   jdkTarball="${jdkDir}"/jdk.tar.gz
   javaExe="${jdkDir}/$(_get_relative_jdk_bin)"/java
