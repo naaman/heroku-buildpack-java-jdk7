@@ -13,7 +13,7 @@ Example usage:
     $ ls
     Procfile  pom.xml  src
 
-    $ heroku create --stack cedar --buildpack http://github.com/naamannewbold/heroku-buildpack-java-jdk7.git
+    $ heroku create --buildpack http://github.com/naamannewbold/heroku-buildpack-java-jdk7.git
 
     $ git push heroku master
     ...
