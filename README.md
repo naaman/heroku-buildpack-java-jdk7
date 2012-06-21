@@ -3,7 +3,7 @@ Heroku buildpack: Java
 
 This is a [Heroku buildpack](http://devcenter.heroku.com/articles/buildpack) for Maven-based Java apps.
 It uses Maven 3.0.3 to build your application runs the app with the latest major version of OpenJDK 6 or 7.
-If no version is specified, it defaults to OpenJDK 7.
+If no version is specified, it defaults to OpenJDK 6.
 
 Usage
 -----
@@ -30,8 +30,8 @@ Example usage:
        [INFO] ------------------------------------------------------------------------
     ...
 
-By default, the app will use Java 7. However, the primary version of java can be specified with the 
-maven-compiler-plugin. To specify Java 6, add the following to your `pom.xml`
+By default, the app will use Java 6. However, the primary version of java can be specified with the 
+maven-compiler-plugin. To specify Java 7, add the following to your `pom.xml`
 
 ```xml
 <plugin>
